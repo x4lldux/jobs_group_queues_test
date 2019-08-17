@@ -1,0 +1,4 @@
+%{
+  "jobs": {:hex, :jobs, "0.9.0", "b2f0071531c4a48575a096fec428dcdd4555c64e5086fe521fceaf581b1f51dc", [:rebar3], [{:parse_trans, "3.3.0", [hex: :parse_trans, repo: "hexpm", optional: false]}], "hexpm"},
+  "parse_trans": {:hex, :parse_trans, "3.3.0", "09765507a3c7590a784615cfd421d101aec25098d50b89d7aa1d66646bc571c1", [:rebar3], [], "hexpm"},
+}

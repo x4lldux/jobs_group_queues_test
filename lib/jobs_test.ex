@@ -3,10 +3,10 @@ defmodule Aggregator do
 
   @group_limit 5
   @queue_limit 3
-  
+
   @doc """
   Shows the problem with uneven awekings of queues in a high demand situation.
-  
+
   It starts _nqueues_ of queus with a rate limit, all belonging to a group, also
   rate limited. Then it starts _nproc_ processes per each queue. All processes
   try to access their respected queue and once it's granted they send a message
@@ -15,7 +15,9 @@ defmodule Aggregator do
   """
   def test(nqueue, nproc) do
     {:ok, pid} = Aggregator.start_link {nqueue, nproc}
-    :jobs.add_group_rate :gq, limit: @group_limit
+    if :jobs.info(:group_rates) == [] do
+      :jobs.add_group_rate :gq, limit: @group_limit
+    end
 
     queue_names = 0..(nqueue-1) |> Enum.to_list
     for q <- queue_names do
@@ -29,7 +31,15 @@ defmodule Aggregator do
     end
 
     Process.sleep 100
-    wait_for_finish(nproc)
+    res = wait_for_finish(nproc)
+
+    for q <- queue_names do
+      :jobs.delete_queue q
+    end
+    # :jobs.delete_group_rate :gq
+    Aggregator.stop
+
+    res
   end
 
   defp wait_for_finish(nproc) do
@@ -87,7 +97,7 @@ defmodule Aggregator do
 
   def handle_info({q, time}, {nqueue, nproc, events}) do
     events = Map.update(events, time, [q], fn qs -> [q|qs] end)
-    
+
     {:noreply, {nqueue, nproc, events}}
   end
 end
